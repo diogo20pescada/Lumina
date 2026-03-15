@@ -442,33 +442,50 @@ CONTEXTO DE DATA: Hoje é ${dataAtualPT} (${dia}/${mes}/${ano}).
 - A data atual é SEMPRE ${dataAtualPT}.`;
     
     const provider = getChatProvider();
+    const openai = getOpenAIClient();
     let resposta = "";
 
+    const gerarRespostaOpenAI = async () => {
+      if (!openai) throw new Error("OPENAI_API_KEY não configurada.");
+      const response = await openai.chat.completions.create({
+        model: getOpenAIModel(),
+        messages: [
+          { role: "system", content: sistemaInstrucoes },
+          { role: "user", content: mensagem }
+        ],
+        temperature: 0.7,
+        max_tokens: 500
+      });
+      return response.choices?.[0]?.message?.content || "Não consegui gerar resposta agora.";
+    };
+
     if (provider === "ollama") {
-      resposta = await gerarRespostaOllama(sistemaInstrucoes, mensagem);
+      try {
+        resposta = await gerarRespostaOllama(sistemaInstrucoes, mensagem);
+      } catch (ollamaErr) {
+        const ollamaMsg = ollamaErr?.error?.message || ollamaErr?.message || "Erro Ollama";
+        const falhaConexaoOllama = /fetch failed|ECONNREFUSED|connect|socket|ENOTFOUND/i.test(String(ollamaMsg));
+
+        // Se Ollama estiver indisponível, tenta OpenAI automaticamente quando houver chave configurada.
+        if (openai && falhaConexaoOllama) {
+          resposta = await gerarRespostaOpenAI();
+        } else {
+          throw ollamaErr;
+        }
+      }
     } else {
-      const openai = getOpenAIClient();
-      const podeUsarOpenAI = Boolean(openai) && provider !== "ollama";
+      const podeUsarOpenAI = Boolean(openai);
 
       if (!podeUsarOpenAI) {
         resposta = await gerarRespostaOllama(sistemaInstrucoes, mensagem);
       } else {
         try {
-          const response = await openai.chat.completions.create({
-            model: getOpenAIModel(),
-            messages: [
-              { role: "system", content: sistemaInstrucoes },
-              { role: "user", content: mensagem }
-            ],
-            temperature: 0.7,
-            max_tokens: 500
-          });
-          resposta = response.choices?.[0]?.message?.content || "Não consegui gerar resposta agora.";
+          resposta = await gerarRespostaOpenAI();
         } catch (openAiErr) {
           const openAiMsg = openAiErr?.error?.message || openAiErr?.message || "Erro OpenAI";
           const semQuotaOuCredencial = /insufficient_quota|invalid api key|exceeded your current quota/i.test(String(openAiMsg));
 
-          // Em modo auto, cai para Ollama quando OpenAI falhar por quota/chave.
+          // Em modo auto/openai, cai para Ollama quando OpenAI falhar por quota/chave.
           if ((provider === "auto" || provider === "openai") && semQuotaOuCredencial) {
             resposta = await gerarRespostaOllama(sistemaInstrucoes, mensagem);
           } else {
