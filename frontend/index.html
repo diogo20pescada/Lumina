@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#7c3aed">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lumina">
+<meta name="description" content="Assistente de inteligência artificial Lumina">
+<title>Lumina</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <div class="login" id="loginBox">
+    <h2>Lumina</h2>
+    <input type="text" id="nomeReg" placeholder="Nome" style="display:none">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="senha" placeholder="Senha">
+    <button id="btnLogin">Entrar</button>
+    <button id="btnRegistrar">Registrar</button>
+    <p id="status"></p>
+  </div>
+  <div class="planos" id="planosBox" style="display:none">
+    <h2>Escolha seu Plano</h2>
+    <div class="plano-card">
+      <h3>Gratuito</h3>
+      <p>7 dias de uso limitado</p>
+      <p>€0</p>
+      <button onclick="escolherPlano('gratuito')">Continuar Gratuito</button>
+    </div>
+    <div class="plano-card">
+      <h3>Básico</h3>
+      <p>30 dias de acesso completo</p>
+      <p>€4.99/mês</p>
+      <button onclick="escolherPlano('basico')" class="payment-btn">💳 Pagar com Stripe</button>
+    </div>
+    <div class="plano-card">
+      <h3>Premium</h3>
+      <p>1 ano de acesso ilimitado</p>
+      <p>€19.99/ano</p>
+      <button onclick="escolherPlano('premium')" class="payment-btn">💳 Pagar com Stripe</button>
+    </div>
+  </div>
+
+  <div class="chat" id="chatBox" style="display:none">
+    <div class="chat-container">
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <h3>📚 Histórico</h3>
+          <button id="btnFecharSidebar" class="btn-close">✕</button>
+        </div>
+        <div id="listaHistorico"></div>
+      </div>
+      <div class="chat-main">
+        <h2 id="boasVindas"></h2>
+        <button id="btnHistorico" class="btn-historico">📚 Ver Histórico</button>
+        <button id="btnMudarPlano" class="change-plan-btn">📋 Mudar de Plano</button>
+        <label class="label-checkbox">
+          <input type="checkbox" id="naoGuardar"> 
+          <span>🔒 Não guardar esta conversa no histórico</span>
+        </label>
+        <div id="conversas"></div>
+        <div id="inputRow">
+          <input type="file" id="inputFoto" accept="image/*" style="display:none">
+          <button id="btnCarregarFoto" class="btn-upload" title="Carregar foto para análise">📷 Foto</button>
+          <input type="text" id="mensagem" placeholder="Digite sua mensagem">
+          <button id="btnEnviar">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module" src="app.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js");
+    });
+  }
+</script>
+</body>
+</html>

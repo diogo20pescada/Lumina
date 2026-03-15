@@ -1,0 +1,13 @@
+{
+  "appId": "com.diogopescada.lumina",
+  "appName": "Lumina",
+  "webDir": "frontend",
+  "server": {
+    "url": "https://COLOCA_AQUI_O_TEU_URL.onrender.com",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#0d1117"
+  }
+}
